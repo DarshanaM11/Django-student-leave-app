@@ -27,9 +27,62 @@
             /* Darker text for better contrast */
         }
 
-        .icon {
+        .profile-icon {
             font-size: 1.8rem;
             color: #37474f;
+            cursor: pointer;
+            position: relative;
+            /* Ensures the popover positions relative to the icon */
+        }
+
+
+        .popover {
+            display: none;
+            position: absolute;
+            top: 7%;
+            /* Places the popover directly below the icon */
+            left: 87%;
+            /* Centers the popover relative to the icon */
+            transform: translate(-50%, 10px);
+            /* Adjusts the alignment slightly and adds space below */
+            background-color: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px 30px;
+            width: auto;
+            z-index: 1000;
+            transition: opacity 0.2s ease;
+        }
+
+        .popover.show {
+            display: block;
+        }
+
+        .popover .profile-name {
+            display: flex;
+            justify-content: center;
+            font-size: 1.2vw;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: black;
+        }
+
+        .popover .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 3px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .popover .logout-btn i {
+            color: white;
+            /* Ensure the icon color is white */
+            margin-right: 8px;
         }
 
         .container {
@@ -39,14 +92,22 @@
             box-shadow: 5px 4px 6px rgba(0, 0, 0, 0.349);
             /* Optional shadow for modern look */
         }
+       
     </style>
 </head>
 
-<body>
+<body >
     <div class="p-2 d-flex justify-content-between ps-5 pe-5">
         <!-- Display Welcome Message -->
         <h2 class="px-3">Welcome, {{ request.user.username }}!</h2>
-        <i class="icon bi bi-person-circle  "></i>
+        <i class="profile-icon bi bi-person-circle"></i>
+        <div id="popover" class="popover">
+            <div class="profile-name">{{ user.first_name }}</div>
+            <div class="profile-name">{{ request.user.username }}</div>
+            <button class="logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
     </div>
 
     <div class="container mt-2">
@@ -76,13 +137,14 @@
                 </tr>
             </thead>
             <tbody>
+
                 {% if student_data %}
                 {% for data in student_data %}
                 <tr>
                     <td>{{ data.leave_type }}</td>
                     <td>{{ data.leave_date_from }} to {{ data.leave_date_to }}</td>
                     <td>{{ data.status }}</td>
-                   
+
                 </tr>
                 {% endfor %}
                 {% else %}
@@ -160,11 +222,43 @@
     </div>
 
 
+
     <!-- Bootstrap JS (for modal functionality) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 </body>
 
 <script>
+
+
+    // Function to toggle the popover visibility
+    document.querySelector('.profile-icon').addEventListener('click', function (event) {
+        const popover = document.getElementById('popover');
+        popover.classList.toggle('show');
+        event.stopPropagation(); // Prevent click event from propagating to the document
+    });
+
+    // Function to close the popover when clicking outside
+    document.addEventListener('click', function (event) {
+        const popover = document.getElementById('popover');
+        const profileIcon = document.querySelector('.profile-icon');
+
+        // If the click is outside the popover and the profile icon
+        if (!popover.contains(event.target) && event.target !== profileIcon) {
+            popover.classList.remove('show');
+        }
+    });
+
+    // Logout confirmation
+    document.getElementById('logout-btn').addEventListener('click', function () {
+        const confirmation = confirm("Do you want to exit?");
+        if (confirmation) {
+            window.location.href = "/"; // Redirect to home.html
+        }
+    });
+
+
 
     // Function to set the minimum date for Date From and Date To fields
     function setMinDateForDateFields() {
@@ -192,15 +286,20 @@
 
         if (response.ok) {
             const result = await response.json();
+
             if (result.success) {
                 const tableBody = document.querySelector('table tbody');
                 const newRow = document.createElement('tr');
+                const leaveType = formData.get('leaveType');
+                const dateFrom = formData.get('dateFrom');
+                const dateTo = formData.get('dateTo');
+                const status = result.status || "Pending";  
+
                 newRow.innerHTML = `
-            <td>${formData.get('leaveType')}</td>
-            <td>${formData.get('dateFrom')} to ${formData.get('dateTo')}</td>
-            <td>${result.status}</td>
-            <td><button class="btn btn-info">View Details</button></td>
-        `;
+                <td>${leaveType}</td>
+                <td>${dateFrom} to ${dateTo}</td>
+                <td>${status}</td>
+            `;
                 tableBody.appendChild(newRow);
 
                 const noDataRow = document.getElementById('no-data-row');
@@ -208,12 +307,15 @@
                     noDataRow.style.display = 'none';
                 }
 
+                // Hide the modal and reset the form
                 const modal = bootstrap.Modal.getInstance(document.getElementById('leaveModal'));
                 modal.hide();
                 form.reset();
             }
         }
     });
+
+
 </script>
 
 </html>

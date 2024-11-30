@@ -81,7 +81,7 @@ def student_dashboard(request):
             leave_date_from=date_from,
             leave_date_to=date_to,
             whole_day=whole_day,
-            reason=reason
+            reason=reason,
         )
         return JsonResponse({'success': True})
 
