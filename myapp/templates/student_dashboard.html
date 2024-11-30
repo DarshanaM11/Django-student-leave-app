@@ -71,6 +71,7 @@
                 <tr>
                     <th>Leave Type</th>
                     <th>Leave Date</th>
+                    <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -80,15 +81,13 @@
                 <tr>
                     <td>{{ data.leave_type }}</td>
                     <td>{{ data.leave_date_from }} to {{ data.leave_date_to }}</td>
-                    <td>
-                        <button class="btn btn-info">View Details</button>
-                    </td>
+                    <td>{{ data.status }}</td>
+
                 </tr>
                 {% endfor %}
                 {% else %}
-                <!-- This row will be hidden dynamically when data is added -->
                 <tr id="no-data-row">
-                    <td colspan="3" class="text-center">No leave applications found.</td>
+                    <td colspan="5" class="text-center">No leave applications found.</td>
                 </tr>
                 {% endif %}
             </tbody>
@@ -177,7 +176,7 @@
     // Call the function to set the minimum date on page load
     setMinDateForDateFields();
 
-    
+
     document.querySelector('form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const form = e.target;
@@ -194,23 +193,21 @@
         if (response.ok) {
             const result = await response.json();
             if (result.success) {
-                // Dynamically add the new row to the table
                 const tableBody = document.querySelector('table tbody');
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                <td>${formData.get('leaveType')}</td>
-                <td>${formData.get('dateFrom')} to ${formData.get('dateTo')}</td>
-                <td><button class="btn btn-info">View Details</button></td>
-            `;
+            <td>${formData.get('leaveType')}</td>
+            <td>${formData.get('dateFrom')} to ${formData.get('dateTo')}</td>
+            <td>${result.status}</td>
+            <td><button class="btn btn-info">View Details</button></td>
+        `;
                 tableBody.appendChild(newRow);
 
-                // Hide the "No leave applications found" message if it's visible
                 const noDataRow = document.getElementById('no-data-row');
                 if (noDataRow) {
                     noDataRow.style.display = 'none';
                 }
 
-                // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('leaveModal'));
                 modal.hide();
                 form.reset();
