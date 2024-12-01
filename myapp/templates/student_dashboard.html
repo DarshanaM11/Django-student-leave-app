@@ -114,18 +114,17 @@
                                     <option value="Student">Student Leave</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label for="leaveDays" class="form-label">Number of Days</label>
-                                <input type="number" class="form-control" id="leaveDays" name="leaveDays" min="1"
-                                    required>
+
+                            <!-- Whole Day Checkbox -->
+                            <div class="col-md-6  mt-5 d-flex align-items-center">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="wholeDay" name="wholeDay">
+                                    <label for="wholeDay" class="form-check-label">Whole Day</label>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Whole Day Checkbox -->
-                        <div class="form-check mt-3">
-                            <input type="checkbox" class="form-check-input" id="wholeDay" name="wholeDay">
-                            <label for="wholeDay" class="form-check-label">Whole Day</label>
-                        </div>
+
 
                         <!-- Date Range Selector Side by Side -->
                         <div class="row g-3 mt-3">
