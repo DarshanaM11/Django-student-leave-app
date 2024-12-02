@@ -49,7 +49,11 @@
 
         <!-- Button to Open the Modal (Positioned Right) -->
         <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveModal">Apply for Leave</button>
+            <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveModal">Apply for Leave</button> -->
+            <button class="btn btn-sm btn-primary" id="applyLeaveButton" data-bs-toggle="modal"
+                data-bs-target="#leaveModal">
+                <i class="bi bi-plus-lg me-2"></i> Apply Leave
+            </button>
         </div>
 
         <!-- Bootstrap Table -->
@@ -73,9 +77,9 @@
                         <td>
                             <button class="btn btn-sm btn-primary edit-btn" data-id="{{ data.id }}"
                                 data-leave-type="{{ data.leave_type }}" data-date-from="{{ data.leave_date_from }}"
-                                data-date-to="{{ data.leave_date_to }}" data-whole-day="{{ data.whole_day }}"
-                                data-reason="{{ data.reason }}">
-                                Edit
+                                data-date-to="{{ data.leave_date_to }}"
+                                data-reason="{{ data.reason }}" data-bs-toggle="modal" data-bs-target="#leaveModal">
+                                <i class="bi bi-pencil me-2"></i> Edit
                             </button>
                         </td>
                     </tr>
@@ -99,7 +103,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST">
+                    <form method="POST" id="leaveForm">
                         {% csrf_token %}
 
                         <!-- Leave Type and Number of Days Side by Side -->
@@ -115,25 +119,17 @@
                                 </select>
                             </div>
 
-                            <!-- Whole Day Checkbox -->
-                            <div class="col-md-6  mt-5 d-flex align-items-center">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="wholeDay" name="wholeDay">
-                                    <label for="wholeDay" class="form-check-label">Whole Day</label>
-                                </div>
-                            </div>
+                          
                         </div>
 
-
-
                         <!-- Date Range Selector Side by Side -->
-                        <div class="row g-3 mt-3">
+                        <div class="row g-3 mt-3" id="dateRange">
                             <div class="col-md-6">
                                 <label for="dateFrom" class="form-label">Date From</label>
                                 <input type="date" class="form-control" id="dateFrom" name="dateFrom" min="{{ today }}"
                                     required>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" id="dateToDiv">
                                 <label for="dateTo" class="form-label">Date To</label>
                                 <input type="date" class="form-control" id="dateTo" name="dateTo" min="{{ today }}"
                                     required>
@@ -153,7 +149,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Bootstrap JS (for modal functionality) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

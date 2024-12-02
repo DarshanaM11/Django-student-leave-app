@@ -61,8 +61,8 @@ def todos(request):
 def student_dashboard(request):
     print(f"Current user: {request.user.username}") 
     if not request.user.is_authenticated:
-        # If the user is not authenticated, redirect them to the login page
-        return redirect('login')  # Make sure 'login' is the name of your login URL
+        # Redirect unauthenticated users to the login page
+        return redirect('login')
 
     if request.method == "POST":
         if "editId" in request.POST:  # Handle editing an existing leave application
@@ -70,15 +70,14 @@ def student_dashboard(request):
             leave_type = request.POST.get("leaveType")
             date_from = request.POST.get("dateFrom")
             date_to = request.POST.get("dateTo")
-            whole_day = bool(request.POST.get("wholeDay"))
             reason = request.POST.get("reason")
 
             try:
+                # Find the leave application by ID
                 leave_application = LeaveApplication.objects.get(id=edit_id, username=request.user.username)
                 leave_application.leave_type = leave_type
                 leave_application.leave_date_from = date_from
                 leave_application.leave_date_to = date_to
-                leave_application.whole_day = whole_day
                 leave_application.reason = reason
                 leave_application.save()
 
@@ -89,7 +88,7 @@ def student_dashboard(request):
             leave_type = request.POST.get("leaveType")
             date_from = request.POST.get("dateFrom")
             date_to = request.POST.get("dateTo")
-            whole_day = bool(request.POST.get("wholeDay"))
+
             reason = request.POST.get("reason")
 
             LeaveApplication.objects.create(
@@ -97,12 +96,11 @@ def student_dashboard(request):
                 leave_type=leave_type,
                 leave_date_from=date_from,
                 leave_date_to=date_to,
-                whole_day=whole_day,
                 reason=reason,
             )
             return JsonResponse({'success': True})
 
-    # Fetch the leave applications for the logged-in user
+    # Fetch all leave applications for the logged-in user
     student_data = LeaveApplication.objects.filter(username=request.user.username)
 
     return render(request, "student_dashboard.html", {

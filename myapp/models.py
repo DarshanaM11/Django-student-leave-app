@@ -18,7 +18,6 @@ class LeaveApplication(models.Model):
     leave_type = models.CharField(max_length=50)
     leave_date_from = models.DateField()
     leave_date_to = models.DateField()
-    whole_day = models.BooleanField(default=False)
     reason = models.TextField()
     status = models.CharField(
         max_length=20,
