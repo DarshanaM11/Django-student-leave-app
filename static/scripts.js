@@ -85,11 +85,19 @@ document.querySelector('form').addEventListener('submit', async function (e) {
 
 
 
-
 document.addEventListener("DOMContentLoaded", () => {
     const editButtons = document.querySelectorAll(".edit-btn");
     const applyLeaveButton = document.getElementById("applyLeaveButton"); // Add the ID to the button
     const leaveForm = document.getElementById("leaveForm");
+
+    // Function to format date to YYYY-MM-DD
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        const year = date.getFullYear();
+        const month = ("0" + (date.getMonth() + 1)).slice(-2); // Month is 0-based, so we add 1
+        const day = ("0" + date.getDate()).slice(-2);
+        return `${year}-${month}-${day}`;
+    }
 
     // Populate modal fields when editing
     editButtons.forEach(button => {
@@ -100,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const dateTo = button.getAttribute("data-date-to");
             const reason = button.getAttribute("data-reason");
 
-
             // Log the data to the console for debugging
             console.log("Edit button clicked:");
             console.log("Leave ID:", leaveId);
@@ -109,10 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("Date To:", dateTo);
             console.log("Reason:", reason);
 
+            // Convert dateFrom and dateTo to YYYY-MM-DD format
+            const formattedDateFrom = formatDate(dateFrom);
+            const formattedDateTo = formatDate(dateTo);
+
             // Populate the modal form fields
             leaveForm.querySelector("#leaveType").value = leaveType;
-            leaveForm.querySelector("#dateFrom").value = dateFrom;
-            leaveForm.querySelector("#dateTo").value = dateTo;
+            leaveForm.querySelector("#dateFrom").value = formattedDateFrom;
+            leaveForm.querySelector("#dateTo").value = formattedDateTo;
             leaveForm.querySelector("#reason").value = reason;
 
             // Add a hidden input for the edit ID
