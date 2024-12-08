@@ -58,38 +58,59 @@ def todos(request):
 # def student_dashboard(request):
 #     return render(request, 'student_dashboard.html')
 
-
 def student_dashboard(request):
-    
     print(f"Current user: {request.user.username}") 
     if not request.user.is_authenticated:
-        # If the user is not authenticated, redirect them to the login page
-        return redirect('login')  # Make sure 'login' is the name of your login URL
+        # Redirect unauthenticated users to the login page
+        return redirect('login')
 
-    # Proceed if the user is authenticated
     if request.method == "POST":
-        leave_type = request.POST.get("leaveType")
-        date_from = request.POST.get("dateFrom")
-        date_to = request.POST.get("dateTo")
-        whole_day = bool(request.POST.get("wholeDay"))
-        reason = request.POST.get("reason")
+        if "editId" in request.POST:  # Handle editing an existing leave application
+            edit_id = request.POST.get("editId")
+            leave_type = request.POST.get("leaveType")
+            date_from = request.POST.get("dateFrom")
+            date_to = request.POST.get("dateTo")
+            reason = request.POST.get("reason")
 
-        # Save the leave application with the logged-in user's username
-        LeaveApplication.objects.create(
-            username=request.user.username,  # This ensures the logged-in user is used
-            leave_type=leave_type,
-            leave_date_from=date_from,
-            leave_date_to=date_to,
-            whole_day=whole_day,
-            reason=reason
-        )
-        return JsonResponse({'success': True})
+            try:
+                # Find the leave application by ID
+                leave_application = LeaveApplication.objects.get(id=edit_id, username=request.user.username)
+                leave_application.leave_type = leave_type
+                leave_application.leave_date_from = date_from
+                leave_application.leave_date_to = date_to
+                leave_application.reason = reason
+                leave_application.save()
 
-    # Fetch the leave applications for the logged-in user
+                return JsonResponse({'success': True, 'message': 'Leave application updated successfully'})
+            except LeaveApplication.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Leave application not found'})
+        else:  # Handle adding a new leave application
+            leave_type = request.POST.get("leaveType")
+            date_from = request.POST.get("dateFrom")
+            date_to = request.POST.get("dateTo")
+
+            reason = request.POST.get("reason")
+
+            LeaveApplication.objects.create(
+                username=request.user.username,
+                leave_type=leave_type,
+                leave_date_from=date_from,
+                leave_date_to=date_to,
+                reason=reason,
+            )
+            return JsonResponse({'success': True})
+
+    # Fetch all leave applications for the logged-in user
     student_data = LeaveApplication.objects.filter(username=request.user.username)
 
-    # Pass the data and the logged-in user's username to the template
     return render(request, "student_dashboard.html", {
         "student_data": student_data,
-        "username": request.user.username  # Ensure it uses the logged-in user's username
+        "username": request.user.username
     })
+    
+def about(request):
+    return render(request, 'about.html')
+
+def contact(request):
+    return render(request, 'contact.html')
+

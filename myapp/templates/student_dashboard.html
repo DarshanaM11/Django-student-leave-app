@@ -18,39 +18,26 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <style>
-        /* Basic styling for the page */
-        body {
-            background-color: #ffffffff;
-            /* Light gray background */
-            color: #343a40;
-            /* Darker text for better contrast */
-        }
 
-        .icon {
-            font-size: 1.8rem;
-            color: #37474f;
-        }
+    <link href="{% static 'styles.css' %}" rel="stylesheet">
 
-        .container {
-            background: linear-gradient(to bottom, #1e5de658, #d9e5ff, #a3baff29);
-            /* White background for better contrast */
-            padding: 20px;
-            box-shadow: 5px 4px 6px rgba(0, 0, 0, 0.349);
-            /* Optional shadow for modern look */
-        }
-    </style>
 </head>
 
 <body>
     <div class="p-2 d-flex justify-content-between ps-5 pe-5">
         <!-- Display Welcome Message -->
         <h2 class="px-3">Welcome, {{ request.user.username }}!</h2>
-        <i class="icon bi bi-person-circle  "></i>
+        <i class="profile-icon bi bi-person-circle"></i>
+        <div id="popover" class="popover">
+            <div class="profile-name">{{ user.first_name }}</div>
+            <div class="profile-name">{{ request.user.username }}</div>
+            <button class="logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
     </div>
 
     <div class="container mt-2">
-
         <!-- Display Success Messages (optional) -->
         {% if messages %}
         <div class="alert alert-success mt-4" role="alert">
@@ -62,37 +49,49 @@
 
         <!-- Button to Open the Modal (Positioned Right) -->
         <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveModal">Apply for Leave</button>
+            <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#leaveModal">Apply for Leave</button> -->
+            <button class="btn btn-sm btn-primary" id="applyLeaveButton" data-bs-toggle="modal"
+                data-bs-target="#leaveModal">
+                <i class="bi bi-plus-lg me-2"></i> Apply Leave
+            </button>
         </div>
 
         <!-- Bootstrap Table -->
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Leave Type</th>
-                    <th>Leave Date</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if student_data %}
-                {% for data in student_data %}
-                <tr>
-                    <td>{{ data.leave_type }}</td>
-                    <td>{{ data.leave_date_from }} to {{ data.leave_date_to }}</td>
-                    <td>
-                        <button class="btn btn-info">View Details</button>
-                    </td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                <!-- This row will be hidden dynamically when data is added -->
-                <tr id="no-data-row">
-                    <td colspan="3" class="text-center">No leave applications found.</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Leave Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if student_data %}
+                    {% for data in student_data %}
+                    <tr>
+                        <td>{{ data.leave_type }}</td>
+                        <td>{{ data.leave_date_from }} to {{ data.leave_date_to }}</td>
+                        <td>{{ data.status }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-btn" data-id="{{ data.id }}"
+                                data-leave-type="{{ data.leave_type }}" data-date-from="{{ data.leave_date_from }}"
+                                data-date-to="{{ data.leave_date_to }}"
+                                data-reason="{{ data.reason }}" data-bs-toggle="modal" data-bs-target="#leaveModal">
+                                <i class="bi bi-pencil me-2"></i> Edit
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr id="no-data-row" class="no-data">
+                        <td colspan="4">No leave applications found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Modal -->
@@ -104,7 +103,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST">
+                    <form method="POST" id="leaveForm">
                         {% csrf_token %}
 
                         <!-- Leave Type and Number of Days Side by Side -->
@@ -119,27 +118,18 @@
                                     <option value="Student">Student Leave</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label for="leaveDays" class="form-label">Number of Days</label>
-                                <input type="number" class="form-control" id="leaveDays" name="leaveDays" min="1"
-                                    required>
-                            </div>
-                        </div>
 
-                        <!-- Whole Day Checkbox -->
-                        <div class="form-check mt-3">
-                            <input type="checkbox" class="form-check-input" id="wholeDay" name="wholeDay">
-                            <label for="wholeDay" class="form-check-label">Whole Day</label>
+                          
                         </div>
 
                         <!-- Date Range Selector Side by Side -->
-                        <div class="row g-3 mt-3">
+                        <div class="row g-3 mt-3" id="dateRange">
                             <div class="col-md-6">
                                 <label for="dateFrom" class="form-label">Date From</label>
                                 <input type="date" class="form-control" id="dateFrom" name="dateFrom" min="{{ today }}"
                                     required>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" id="dateToDiv">
                                 <label for="dateTo" class="form-label">Date To</label>
                                 <input type="date" class="form-control" id="dateTo" name="dateTo" min="{{ today }}"
                                     required>
@@ -160,63 +150,12 @@
         </div>
     </div>
 
-
     <!-- Bootstrap JS (for modal functionality) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 </body>
+<script src="{% static 'scripts.js' %}"></script>
 
-<script>
-
-    // Function to set the minimum date for Date From and Date To fields
-    function setMinDateForDateFields() {
-        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-        document.getElementById('dateFrom').setAttribute('min', today); // Set min date for "Date From"
-        document.getElementById('dateTo').setAttribute('min', today);   // Set min date for "Date To"
-    }
-
-    // Call the function to set the minimum date on page load
-    setMinDateForDateFields();
-
-    
-    document.querySelector('form').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            }
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-                // Dynamically add the new row to the table
-                const tableBody = document.querySelector('table tbody');
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                <td>${formData.get('leaveType')}</td>
-                <td>${formData.get('dateFrom')} to ${formData.get('dateTo')}</td>
-                <td><button class="btn btn-info">View Details</button></td>
-            `;
-                tableBody.appendChild(newRow);
-
-                // Hide the "No leave applications found" message if it's visible
-                const noDataRow = document.getElementById('no-data-row');
-                if (noDataRow) {
-                    noDataRow.style.display = 'none';
-                }
-
-                // Close the modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('leaveModal'));
-                modal.hide();
-                form.reset();
-            }
-        }
-    });
-</script>
 
 </html>
