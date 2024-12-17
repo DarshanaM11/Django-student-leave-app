@@ -88,6 +88,12 @@
         <div class="alert alert-{{ message.tags }}">{{ message }}</div>
         {% endfor %}
       </div>
+      <script>
+ 
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
+      </script>
       {% endif %}
     </div>
 
